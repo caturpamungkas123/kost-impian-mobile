@@ -30,8 +30,8 @@ class KosankuBottomNav extends StatelessWidget {
 
   static const _items = [
     (FontAwesomeIcons.house, FontAwesomeIcons.house, 'Explore'),
-    (FontAwesomeIcons.map, FontAwesomeIcons.solidMap, 'Peta'),
     (FontAwesomeIcons.heart, FontAwesomeIcons.solidHeart, 'Favorit'),
+    (FontAwesomeIcons.building, FontAwesomeIcons.solidBuilding, 'Kelola'),
     (FontAwesomeIcons.message, FontAwesomeIcons.solidMessage, 'Chat'),
     (FontAwesomeIcons.user, FontAwesomeIcons.solidUser, 'Profil'),
   ];
@@ -63,6 +63,7 @@ class KosankuBottomNav extends StatelessWidget {
             children: List.generate(_items.length, (i) {
               final active = i == currentIndex;
               final (outline, filled, label) = _items[i];
+              
               return GestureDetector(
                 onTap: () => onTap(i),
                 child: Stack(

@@ -19,16 +19,34 @@ class AppTypography {
         height: 1.3,
       );
 
+  static TextStyle get h4 => GoogleFonts.plusJakartaSans(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        height: 1.4,
+      );
+
   static TextStyle get bodyMd => GoogleFonts.plusJakartaSans(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.5,
       );
 
+  static TextStyle get labelMd => GoogleFonts.plusJakartaSans(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        height: 1.4,
+      );
+
   static TextStyle get labelSm => GoogleFonts.plusJakartaSans(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         height: 1.33,
+      );
+
+  static TextStyle get labelXs => GoogleFonts.plusJakartaSans(
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        height: 1.27,
       );
 
   /// Display hero onboarding — mengacu ke Stitch "TEMUKAN KOS IMPIAN"

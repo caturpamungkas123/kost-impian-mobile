@@ -1,14 +1,17 @@
 # PRD — Project Requirements Document
+
 ## Aplikasi "KosanKu" — Cari Kos (SaaS)
 
 ## 1. Overview
+
 Mencari kos yang sesuai kebutuhan (lokasi, harga, tipe kamar, dan fasilitas) masih sering merepotkan karena informasi tersebar di berbagai grup, marketplace, atau harus survei langsung ke lokasi. Di sisi lain, **Pemilik Kos** juga kesulitan mempromosikan properti mereka ke calon penyewa secara efisien, terorganisir, dan berkelanjutan — sehingga dibutuhkan platform yang tidak hanya jadi etalase pencarian, tapi juga bisa dikelola secara mandiri dan berkelanjutan oleh Pemilik Kos.
 
 Aplikasi ini dibangun dengan model **SaaS (Software-as-a-Service)**: **Pencari Kos** dapat mencari dan menghubungi Pemilik Kos secara gratis, sementara **Pemilik Kos** berlangganan (subscribe) ke platform untuk mengelola listing kosnya, dengan pilihan paket **Free** (gratis, dengan batasan) atau **Berbayar** (subscription berbayar dengan benefit lebih luas, seperti listing tanpa batas dan status kos unggulan/featured). Pembayaran langganan dilakukan langsung di dalam aplikasi melalui integrasi **payment gateway**. Interaksi lanjutan antara Pencari Kos dan Pemilik Kos — mulai dari tanya info kamar, mengajukan pesanan, hingga mengajukan jadwal observasi — dipusatkan lewat kanal **chat dalam aplikasi**, dengan tombol **WhatsApp** sebagai jalur kontak cepat alternatif di halaman Detail Kos.
 
 ## 2. Requirements
+
 - **Aksesibilitas:** Aplikasi berbasis Mobile (mengikuti referensi desain: iOS/Android), dengan tampilan onboarding, pencarian, dan detail properti sebagai alur utama.
-- **Pengguna:** Dua peran — **Pencari Kos** (mencari & menghubungi, gratis sepenuhnya) dan **Pemilik Kos** (mengelola listing miliknya, berstatus sebagai *tenant* berlangganan). Registrasi menentukan peran pengguna.
+- **Pengguna:** Dua peran — **Pencari Kos** (mencari & menghubungi, gratis sepenuhnya) dan **Pemilik Kos** (mengelola listing miliknya, berstatus sebagai _tenant_ berlangganan). Registrasi menentukan peran pengguna.
 - **Model Bisnis (SaaS):** Freemium dengan **2 tingkatan paket** untuk Pemilik Kos:
   - **Free** — gratis, dengan batasan jumlah listing kos aktif (mis. maksimal 1 kos) dan tanpa akses fitur promosi.
   - **Berbayar** — subscription berbasis periode (bulanan), listing kos tanpa batas, dan akses fitur **Kos Unggulan (Featured)** agar tampil lebih atas di hasil pencarian.
@@ -21,6 +24,7 @@ Aplikasi ini dibangun dengan model **SaaS (Software-as-a-Service)**: **Pencari K
 - **Notifikasi:** Pemilik Kos mendapat notifikasi saat ada pesan, pesanan, atau pengajuan observasi baru lewat chat, serta pengingat saat masa langganan berbayar akan berakhir.
 
 ## 3. Core Features
+
 Fitur-fitur kunci yang harus ada dalam versi pertama (MVP):
 
 1. **Onboarding & Autentikasi**
@@ -59,8 +63,19 @@ Fitur-fitur kunci yang harus ada dalam versi pertama (MVP):
    - Riwayat pembayaran/invoice dan status masa aktif langganan.
 8. **Kos Unggulan (Featured Listing)**
    - Fitur eksklusif paket Berbayar: kos yang ditandai akan diprioritaskan tampil di hasil pencarian & halaman Explore.
+9. **Profil Pengguna**
+   - Halaman untuk melihat & mengelola data akun pribadi, diakses lewat ikon **Profil** di bottom navigation. Isi halaman menyesuaikan peran pengguna.
+   - **Kelola Data Pribadi:** field yang dapat diedit berbeda per peran.
+     - **Pencari Kos:** nama, foto profil (avatar).
+     - **Pemilik Kos:** nama, foto profil (avatar), dan nomor telepon — perubahan nomor telepon otomatis memperbarui nomor kontak WhatsApp di semua kos miliknya.
+     - Email ditampilkan read-only untuk kedua peran, karena berkaitan dengan identitas login/verifikasi akun.
+   - **Ganti Password:** form password lama, password baru, dan konfirmasi — wajib validasi password lama sebelum perubahan diterima, terpisah dari alur "Lupa Password".
+   - **Ringkasan Khusus Peran:** Pemilik Kos melihat kartu status langganan (paket aktif, tanggal berakhir, sisa kuota listing) dengan tombol pintas ke halaman Langganan; Pencari Kos melihat ringkasan jumlah kos favorit dan pengajuan booking/observasi yang masih "menunggu", dengan tombol pintas ke Favorit/Chat.
+   - **Logout:** menghapus token sesi (JWT) dari perangkat dan kembali ke halaman Login.
+   - **Hapus Akun:** dialog konfirmasi eksplisit; untuk Pemilik Kos dengan langganan aktif atau booking berstatus "menunggu/diterima", tampilkan peringatan konsekuensi sebelum melanjutkan. Implementasi disarankan **soft delete** untuk menjaga integritas riwayat transaksi/chat pihak lain yang terkait.
 
 ## 4. User Flow
+
 Alur utama pengguna (fokus pada peran **Pencari Kos**, dengan percabangan untuk **Pemilik Kos**):
 
 1. **Buka Aplikasi:** Pengguna melihat layar onboarding lalu menekan tombol mulai.
@@ -82,8 +97,27 @@ Alur utama pengguna (fokus pada peran **Pencari Kos**, dengan percabangan untuk 
    - **Tombol WhatsApp** → membuka aplikasi WhatsApp langsung ke nomor Pemilik Kos dengan pesan otomatis, sebagai jalur komunikasi cepat di luar sistem chat aplikasi (tidak melalui backend/chat dalam aplikasi).
 8. **Konfirmasi Pemilik:** Khusus jalur Chat di Aplikasi — Pemilik Kos menerima notifikasi atas pesanan/pengajuan observasi yang masuk lewat chat, lalu menerima atau menolak langsung dari dalam percakapan tersebut.
 9. **Perpanjangan Langganan (Pemilik Kos):** Saat masa paket Berbayar mendekati habis, Pemilik Kos menerima notifikasi pengingat dan dapat memperpanjang langsung melalui menu Langganan.
+10. **Kelola Profil (kapan saja):** Dari halaman Profil, pengguna dapat mengedit data pribadi (nama, foto, nomor telepon), mengganti password, melihat ringkasan sesuai peran, logout, atau menghapus akun.
+
+### 4.1 User Flow — Kelola Listing Kos (Pemilik Kos)
+
+Alur detail saat Pemilik Kos mengelola kos miliknya, mulai dari halaman "Kos Saya" (lanjutan dari langkah 2 di atas):
+
+1. **Masuk ke halaman "Kos Saya":** Menampilkan daftar seluruh kos milik Pemilik Kos dalam bentuk card (nama, foto utama, status aktif, badge "Unggulan" jika berlaku). Tampil kosong dengan CTA "+ Tambah Kos" jika belum punya kos sama sekali.
+2. **Tambah Kos Baru:**
+   - Tekan tombol **"+ Tambah Kos"**.
+   - Sistem mengecek limit paket lebih dulu:
+     - **Limit tercapai** (mis. paket Free maks 1 kos) → tampilkan dialog "Limit listing tercapai, upgrade untuk tambah kos" dengan tombol pintas ke halaman Langganan; alur berhenti di sini kecuali pengguna melakukan upgrade.
+     - **Belum mencapai limit** → lanjut ke form tambah kos.
+   - Isi form: nama, alamat, titik lokasi (pilih di peta), tipe (Putra/Putri/Campur), harga mulai, deskripsi, fasilitas (multi-select), minimal upload satu foto, nomor telepon/WA kontak.
+   - Tambah minimal satu tipe kamar (nama tipe, harga, ukuran, status ketersediaan); dapat menambah beberapa tipe kamar sekaligus.
+   - Submit → sistem validasi field wajib → kos tersimpan dan langsung berstatus aktif, muncul di daftar "Kos Saya" sekaligus di hasil pencarian Pencari Kos.
+3. **Edit Kos:** Dari daftar "Kos Saya", pilih kos → tekan **Edit** → form terisi otomatis dari data existing; dapat mengubah info dasar, menambah/menghapus foto, menambah/mengedit/menghapus tipe kamar, memperbarui status ketersediaan kamar, dan mengubah daftar fasilitas → simpan, perubahan langsung tercermin di halaman Detail Kos publik.
+4. **Hapus Kos:** Dari daftar "Kos Saya", pilih kos → tekan **Hapus** → dialog konfirmasi muncul, dengan peringatan tambahan jika kos masih memiliki booking berstatus "menunggu/diterima" atau thread chat aktif → setelah dikonfirmasi, kos di-soft-delete (hilang dari pencarian publik, namun histori chat & booking tetap tersimpan bagi pihak Pencari Kos terkait).
+5. **Pantau Kuota & Status Langganan:** Dari halaman "Kos Saya" atau Profil, Pemilik Kos melihat ringkasan sisa kuota listing dan status paket aktif → jika ingin menambah kos lagi atau mengaktifkan status Unggulan, diarahkan ke halaman Langganan untuk upgrade/perpanjang paket.
 
 ## 5. Architecture
+
 Berikut adalah gambaran arsitektur sistem untuk proses inti interaksi: menanyakan info kamar serta mengajukan pesanan/observasi melalui chat dengan Pemilik Kos. (Tombol WhatsApp di halaman Detail Kos tidak melalui alur ini — cukup tautan `wa.me` langsung ke aplikasi WhatsApp tanpa memproses data di backend sistem.)
 
 ```mermaid
@@ -136,9 +170,12 @@ erDiagram
         string name
         string email
         string password_hash
-        string phone
+        string phone "nullable, wajib untuk role Pemilik Kos"
+        string avatar_url
         string role
         datetime created_at
+        datetime updated_at
+        datetime deleted_at
     }
 
     plans {
@@ -269,23 +306,24 @@ erDiagram
     bookings ||--o{ messages : "direferensikan oleh"
 ```
 
-| Tabel | Deskripsi |
-|-------|-----------|
-| **users** | Data pengguna dengan dua kemungkinan peran: Pencari Kos atau Pemilik Kos. Kolom `phone` juga dipakai sebagai nomor WhatsApp pada tombol kontak langsung di halaman Detail Kos |
-| **plans** | Master data paket langganan (Free & Berbayar) beserta batasan dan benefitnya |
-| **subscriptions** | Status langganan aktif seorang Pemilik Kos terhadap sebuah paket |
-| **transactions** | Riwayat transaksi pembayaran langganan, termasuk referensi ke payment gateway |
-| **kos** | Master data kos milik seorang Pemilik Kos, mencakup lokasi, tipe, harga mulai, dan status featured |
-| **rooms** | Tipe-tipe kamar yang tersedia di sebuah kos beserta harga & status ketersediaan |
-| **facilities** | Master data fasilitas yang bisa dimiliki sebuah kos (WiFi, AC, dsb) |
-| **kos_facilities** | Tabel relasi many-to-many antara kos dan fasilitas |
-| **photos** | Galeri foto milik sebuah kos |
-| **favorites** | Tabel relasi kos yang disimpan/difavoritkan oleh pengguna |
-| **conversations** | Thread percakapan antara Pencari Kos dan Pemilik Kos terkait sebuah kos |
-| **messages** | Pesan-pesan dalam sebuah conversation, termasuk pesan terstruktur seperti info kamar atau update status pesanan/observasi (`type`) |
-| **bookings** | Pengajuan pesanan/booking kamar atau observasi/survei lokasi, diajukan lewat chat dan tertaut ke sebuah conversation (`type` membedakan booking vs survei) |
+| Tabel              | Deskripsi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **users**          | Data pengguna dengan dua kemungkinan peran: Pencari Kos atau Pemilik Kos. Kolom `phone` bersifat **nullable** — hanya wajib diisi untuk role Pemilik Kos (dipakai sebagai nomor WhatsApp pada tombol kontak langsung di halaman Detail Kos), sedangkan untuk Pencari Kos bersifat opsional dan tidak ditampilkan di form Kelola Data Pribadi mereka. Kolom `avatar_url` untuk foto profil (fitur Profil), `updated_at` mencatat perubahan data profil terakhir, dan `deleted_at` untuk mekanisme soft delete saat akun dihapus |
+| **plans**          | Master data paket langganan (Free & Berbayar) beserta batasan dan benefitnya                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **subscriptions**  | Status langganan aktif seorang Pemilik Kos terhadap sebuah paket                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **transactions**   | Riwayat transaksi pembayaran langganan, termasuk referensi ke payment gateway                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **kos**            | Master data kos milik seorang Pemilik Kos, mencakup lokasi, tipe, harga mulai, dan status featured                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **rooms**          | Tipe-tipe kamar yang tersedia di sebuah kos beserta harga & status ketersediaan                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **facilities**     | Master data fasilitas yang bisa dimiliki sebuah kos (WiFi, AC, dsb)                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **kos_facilities** | Tabel relasi many-to-many antara kos dan fasilitas                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **photos**         | Galeri foto milik sebuah kos                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **favorites**      | Tabel relasi kos yang disimpan/difavoritkan oleh pengguna                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **conversations**  | Thread percakapan antara Pencari Kos dan Pemilik Kos terkait sebuah kos                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **messages**       | Pesan-pesan dalam sebuah conversation, termasuk pesan terstruktur seperti info kamar atau update status pesanan/observasi (`type`)                                                                                                                                                                                                                                                                                                                                                                                             |
+| **bookings**       | Pengajuan pesanan/booking kamar atau observasi/survei lokasi, diajukan lewat chat dan tertaut ke sebuah conversation (`type` membedakan booking vs survei)                                                                                                                                                                                                                                                                                                                                                                     |
 
 ## 7. Design & Technical Constraints
+
 1. **High-Level Technology:**
    Sistem sebaiknya dibangun dengan teknologi yang mendukung pengembangan cepat (rapid development) dan mudah dipelihara (maintainability), mengingat aplikasi memiliki dua peran pengguna serta lapisan langganan/pembayaran dalam satu basis kode. Pengembang bebas memilih tools yang sesuai selama tetap memperhatikan performa pencarian/filter (fitur inti) dan skalabilitas jumlah Pemilik Kos yang berlangganan.
 
@@ -293,7 +331,7 @@ erDiagram
    Seluruh proses pembayaran wajib melalui payment gateway pihak ketiga (mis. Midtrans/Xendit); sistem hanya menyimpan status & referensi transaksi, bukan data kartu/pembayaran sensitif. Status langganan wajib disinkronkan lewat mekanisme webhook dari payment gateway, bukan hanya dari sisi klien, agar tidak bisa dimanipulasi.
 
 3. **Chat sebagai Kanal Transaksi:**
-   Antarmuka chat perlu mendukung *quick action*/kartu pesan terstruktur (bukan hanya teks bebas) untuk info kamar, pesanan, dan pengajuan observasi, sehingga setiap pengajuan tetap mudah dilacak statusnya (menunggu/diterima/ditolak) dari dalam satu thread percakapan. Chat diimplementasikan sebagai **menu/tab tersendiri berisi daftar percakapan (inbox)**, bukan bubble chat mengambang — karena baik Pencari Kos maupun Pemilik Kos bisa memiliki banyak thread aktif dengan lawan bicara berbeda-beda dalam waktu bersamaan.
+   Antarmuka chat perlu mendukung _quick action_/kartu pesan terstruktur (bukan hanya teks bebas) untuk info kamar, pesanan, dan pengajuan observasi, sehingga setiap pengajuan tetap mudah dilacak statusnya (menunggu/diterima/ditolak) dari dalam satu thread percakapan. Chat diimplementasikan sebagai **menu/tab tersendiri berisi daftar percakapan (inbox)**, bukan bubble chat mengambang — karena baik Pencari Kos maupun Pemilik Kos bisa memiliki banyak thread aktif dengan lawan bicara berbeda-beda dalam waktu bersamaan.
 
 4. **Tombol Kontak WhatsApp:**
    Tombol WA di halaman Detail Kos menggunakan format tautan `wa.me/<nomor>` dengan pesan otomatis (pre-filled text) berisi nama kos yang sedang dilihat. Tombol ini hanya tampil/aktif jika Pemilik Kos telah mengisi nomor telepon yang valid pada data kosnya, dan berjalan murni di sisi klien (deep link), tanpa memerlukan proses tambahan di backend.
@@ -306,3 +344,6 @@ erDiagram
 
 7. **Autentikasi & Keamanan Akun:**
    Password pengguna disimpan dalam bentuk hash (mis. bcrypt/argon2), tidak pernah disimpan sebagai plain text. Sesi login menggunakan token (JWT) dengan masa berlaku (expiry) dan mekanisme refresh token. Tautan verifikasi email dan reset password wajib memiliki masa berlaku terbatas (mis. 30–60 menit) dan hanya dapat dipakai sekali. Endpoint login dilindungi rate limiting untuk mencegah percobaan brute-force.
+
+8. **Profil & Keamanan Akun Tambahan:**
+   Upload foto profil dibatasi ukuran file (mis. maks 2MB) dan format (`.jpg`/`.png`), di-resize/di-compress di sisi server sebelum disimpan. Endpoint ganti password dan hapus akun wajib re-autentikasi (password lama atau re-login), bukan hanya mengandalkan token sesi yang sedang aktif. Saat password diganti, seluruh refresh token yang aktif di perangkat lain sebaiknya di-revoke, memaksa re-login di device lain. Endpoint hapus akun untuk Pemilik Kos harus mengecek dependensi aktif (subscription berjalan, booking pending) sebelum eksekusi, dan menjalankan proses non-aktivasi kos + subscription secara atomik (transaksi database).

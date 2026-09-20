@@ -10,6 +10,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: AuthPage(initialIsLogin: login)),
     );
+    // Tunggu skeleton loading (kMockNetworkDelay) selesai.
+    await tester.pumpAndSettle();
   }
 
   testWidgets('Register mode default: ada nama, WA, dan CTA daftar',
@@ -116,6 +118,8 @@ void main() {
       ],
     );
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    // Tunggu skeleton loading (kMockNetworkDelay) selesai.
+    await tester.pumpAndSettle();
 
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'rian@email.com');

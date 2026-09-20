@@ -6,7 +6,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 import '../../../explore/presentation/pages/explore_page.dart';
+import '../widgets/auth_skeleton.dart';
 import '../widgets/auth_tab_switcher.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/role_selector.dart';
@@ -36,12 +38,22 @@ class _AuthPageState extends State<AuthPage> {
   AuthRole _role = AuthRole.seeker;
   bool _obscurePassword = true;
   bool _rememberMe = true;
+  // Simulasi cek sesi awal — hapus saat AuthBloc tersedia.
+  bool _loading = true;
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(kMockNetworkDelay, () {
+      if (mounted) setState(() => _loading = false);
+    });
+  }
 
   @override
   void dispose() {
@@ -53,8 +65,9 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   String get _ctaLabel {
-    final role = _role.title;
-    return _isLogin ? 'Masuk ke Akun ($role)' : 'Daftar Sebagai $role';
+    // Pilih peran hanya ada di mode register (prd.md §4 langkah 2).
+    if (_isLogin) return 'Masuk ke Akun';
+    return 'Daftar Sebagai ${_role.title}';
   }
 
   /// Validasi lokal UI-first (belum ke backend):
@@ -112,6 +125,11 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        body: SafeArea(child: AuthSkeleton()),
+      );
+    }
     final scheme = Theme.of(context).colorScheme;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final muted =
@@ -138,11 +156,14 @@ class _AuthPageState extends State<AuthPage> {
                 isLogin: _isLogin,
                 onChanged: _switchTab,
               ),
-              const SizedBox(height: AppSpacing.lg),
-              RoleSelector(
-                selected: _role,
-                onChanged: (r) => setState(() => _role = r),
-              ),
+              // Pilih peran hanya pada mode register.
+              if (!_isLogin) ...[
+                const SizedBox(height: AppSpacing.lg),
+                RoleSelector(
+                  selected: _role,
+                  onChanged: (r) => setState(() => _role = r),
+                ),
+              ],
               const SizedBox(height: AppSpacing.lg),
               Form(
                 key: _formKey,

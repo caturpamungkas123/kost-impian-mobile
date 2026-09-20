@@ -17,12 +17,18 @@ class KosCard extends StatelessWidget {
     required this.isFavorite,
     required this.onFavoriteToggle,
     this.imageHeight = 144,
+    this.onTap,
   });
 
   final KosListing listing;
   final bool isFavorite;
   final VoidCallback onFavoriteToggle;
   final double imageHeight;
+
+  /// Tap area konten (gambar/info/spek) → navigasi ke Detail Kos
+  /// (prd.md §4 langkah 5). Tombol love sengaja TIDAK di dalam area ini
+  /// supaya tap hati tidak ikut membuka detail.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -45,22 +51,25 @@ class KosCard extends StatelessWidget {
         children: [
           Stack(
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(AppRadius.md),
-                ),
-                child: Image.network(
-                  listing.imageUrl,
-                  height: imageHeight,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Container(
+              GestureDetector(
+                onTap: onTap,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(AppRadius.md),
+                  ),
+                  child: Image.network(
+                    listing.imageUrl,
                     height: imageHeight,
-                    color: chipBg,
-                    child: FaIcon(
-                    FontAwesomeIcons.house,
-                      size: 40,
-                      color: muted,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => Container(
+                      height: imageHeight,
+                      color: chipBg,
+                      child: FaIcon(
+                      FontAwesomeIcons.house,
+                        size: 40,
+                        color: muted,
+                      ),
                     ),
                   ),
                 ),
@@ -135,111 +144,119 @@ class KosCard extends StatelessWidget {
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          listing.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSm.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.locationDot,
+                              size: 12,
+                              color: muted,
+                            ),
+                            const SizedBox(width: 2),
+                            Expanded(
+                              child: Text(
+                                listing.location,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelSm.copyWith(
+                                  fontSize: 11,
+                                  color: muted,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        listing.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        listing.price,
                         style: AppTypography.labelSm.copyWith(
                           fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Row(
+                      Text(
+                        listing.priceSuffix,
+                        style: AppTypography.labelSm.copyWith(
+                          fontSize: 10,
+                          color: muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                for (var i = 0; i < listing.specs.length; i++) ...[
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: chipBg,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(AppRadius.md),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           FaIcon(
-                            FontAwesomeIcons.locationDot,
-                            size: 12,
+                            listing.specs[i].$1,
+                            size: 11,
                             color: muted,
                           ),
-                          const SizedBox(width: 2),
-                          Expanded(
+                          const SizedBox(width: 4),
+                          Flexible(
                             child: Text(
-                              listing.location,
+                              listing.specs[i].$2,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.labelSm.copyWith(
-                                fontSize: 11,
+                                fontSize: 10,
                                 color: muted,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      listing.price,
-                      style: AppTypography.labelSm.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      listing.priceSuffix,
-                      style: AppTypography.labelSm.copyWith(
-                        fontSize: 10,
-                        color: muted,
-                      ),
-                    ),
-                  ],
-                ),
+                  if (i < listing.specs.length - 1) const SizedBox(width: 6),
+                ],
               ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              for (var i = 0; i < listing.specs.length; i++) ...[
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    decoration: BoxDecoration(
-                      color: chipBg,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(AppRadius.md),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        FaIcon(
-                          listing.specs[i].$1,
-                          size: 11,
-                          color: muted,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            listing.specs[i].$2,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.labelSm.copyWith(
-                              fontSize: 10,
-                              color: muted,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (i < listing.specs.length - 1) const SizedBox(width: 6),
-              ],
-            ],
           ),
         ],
       ),

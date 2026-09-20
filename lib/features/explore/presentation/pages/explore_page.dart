@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/bottom_nav.dart';
-import '../../../favorites/presentation/pages/favorites_page.dart';
+import '../../../../core/widgets/app_shimmer.dart';
+import '../../../favorites/presentation/widgets/favorite_data.dart';
+import '../../../favorites/presentation/widgets/favorites_store.dart';
+import '../../../kos_detail/presentation/pages/kos_detail_page.dart';
+import '../widgets/explore_skeleton.dart';
 import '../widgets/explore_widgets.dart';
 import '../widgets/kos_card.dart';
 import '../widgets/kos_listing.dart';
@@ -36,7 +39,19 @@ class _ExplorePageState extends State<ExplorePage> {
 
   String _selectedFilter = filters[0];
   String _query = '';
-  final Set<String> _favorites = {};
+  // Simulasi fetch awal — hapus saat BLoC tersedia, diganti state loading asli.
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(kMockNetworkDelay, () {
+      if (mounted) setState(() => _loading = false);
+    });
+  }
+
+  /// Favorit dibaca dari [favoritesStore] bersama (bukan Set lokal),
+  /// supaya sinkron dua arah dengan halaman Favorit (prd.md §3.4).
 
   List<KosListing> get _filtered {
     return dummyKosList.where((kos) {
@@ -52,100 +67,93 @@ class _ExplorePageState extends State<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
-    final results = _filtered;
-    final featured = results.where((k) => k.isFeatured).toList();
-    final nearby = results.where((k) => !k.isFeatured).toList();
+    // Dengarkan store agar hati di Explore ikut update saat item
+    // dihapus dari halaman Favorit (dan sebaliknya).
+    return ValueListenableBuilder<List<FavoriteKos>>(
+      valueListenable: favoritesStore,
+      builder: (context, favs, _) {
+        if (_loading) {
+          return const Scaffold(body: ExploreSkeleton());
+        }
+        final favIds = {for (final fav in favs) fav.id};
+        final results = _filtered;
+        final featured = results.where((k) => k.isFeatured).toList();
+        final nearby = results.where((k) => !k.isFeatured).toList();
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.gutter,
-                AppSpacing.sm,
-                AppSpacing.gutter,
-                120, // inset bawah anti-tertutup bottom nav (DESIGN.md)
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const ExploreHeader(),
-                  const SizedBox(height: AppSpacing.md),
-                  ExploreSearchBar(
-                    onChanged: (v) => setState(() => _query = v),
-                    onFilterTap: () {},
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  FilterPills(
-                    filters: filters,
-                    selected: _selectedFilter,
-                    onSelected: (f) => setState(() => _selectedFilter = f),
-                  ),
-                  if (featured.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.lg),
-                    const SectionHeader(
-                      title: 'Kos Unggulan',
-                      trailing: 'Lihat semua',
-                      proTag: true,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    for (final kos in featured)
-                      KosCard(
-                        listing: kos,
-                        imageHeight: 176,
-                        isFavorite: _favorites.contains(kos.id),
-                        onFavoriteToggle: () => setState(() {
-                          _favorites.contains(kos.id)
-                              ? _favorites.remove(kos.id)
-                              : _favorites.add(kos.id);
-                        }),
-                      ),
-                  ],
+        return Scaffold(
+          // Bottom nav disediakan permanen oleh AppShell — halaman ini
+          // hanya konten, supaya tidak ikut animasi pindah page.
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.gutter,
+              AppSpacing.sm,
+              AppSpacing.gutter,
+              120, // inset bawah anti-tertutup bottom nav shell (DESIGN.md)
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const ExploreHeader(),
+                const SizedBox(height: AppSpacing.md),
+                ExploreSearchBar(
+                  onChanged: (v) => setState(() => _query = v),
+                  onFilterTap: () {},
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                FilterPills(
+                  filters: filters,
+                  selected: _selectedFilter,
+                  onSelected: (f) => setState(() => _selectedFilter = f),
+                ),
+                if (featured.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.lg),
                   const SectionHeader(
-                    title: 'Rekomendasi Terdekat',
-                    trailing: 'Dekat MRT & KRL',
+                    title: 'Kos Unggulan',
+                    trailing: 'Lihat semua',
+                    proTag: true,
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  if (nearby.isEmpty && featured.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Center(
-                        child: Text('Tidak ada kos yang cocok.'),
-                      ),
-                    ),
-                  for (var i = 0; i < nearby.length; i++) ...[
+                  for (final kos in featured)
                     KosCard(
-                      listing: nearby[i],
-                      isFavorite: _favorites.contains(nearby[i].id),
-                      onFavoriteToggle: () => setState(() {
-                        _favorites.contains(nearby[i].id)
-                            ? _favorites.remove(nearby[i].id)
-                            : _favorites.add(nearby[i].id);
-                      }),
+                      listing: kos,
+                      imageHeight: 176,
+                      isFavorite: favIds.contains(kos.id),
+                      onFavoriteToggle: () =>
+                          toggleFavoriteFromListing(kos),
+                      // prd.md §4 langkah 5: tap card → Detail Kos.
+                      // push (bukan go) agar tombol back detail berfungsi.
+                      onTap: () => context.push(KosDetailPage.routeName),
                     ),
-                    if (i < nearby.length - 1)
-                      const SizedBox(height: AppSpacing.md),
-                  ],
                 ],
-              ),
+                const SizedBox(height: AppSpacing.lg),
+                const SectionHeader(
+                  title: 'Rekomendasi Terdekat',
+                  trailing: 'Dekat MRT & KRL',
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                if (nearby.isEmpty && featured.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32),
+                    child: Center(
+                      child: Text('Tidak ada kos yang cocok.'),
+                    ),
+                  ),
+                for (var i = 0; i < nearby.length; i++) ...[
+                  KosCard(
+                    listing: nearby[i],
+                    isFavorite: favIds.contains(nearby[i].id),
+                    onFavoriteToggle: () =>
+                        toggleFavoriteFromListing(nearby[i]),
+                    onTap: () => context.push(KosDetailPage.routeName),
+                  ),
+                  if (i < nearby.length - 1)
+                    const SizedBox(height: AppSpacing.md),
+                ],
+              ],
             ),
-            Positioned(
-              left: AppSpacing.gutter,
-              right: AppSpacing.gutter,
-              bottom: 20,
-              child: KosankuBottomNav(
-                currentIndex: 0,
-                unreadChatCount: 2,
-                onTap: (i) {
-                  if (i == 2) context.go(FavoritesPage.routeName);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

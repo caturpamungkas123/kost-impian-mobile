@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mobile/features/favorites/presentation/pages/favorites_page.dart';
+import 'package:mobile/features/favorites/presentation/widgets/favorites_store.dart';
 
 /// UI-first: favorit render header, filter, kartu, banner, bottom nav.
 void main() {
+  // Store global harus di-reset agar tiap test mulai dari 3 dummy yang sama.
+  setUp(resetFavorites);
   Future<void> pumpFav(WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: FavoritesPage()));
+    // Tunggu skeleton loading (kMockNetworkDelay) selesai.
+    await tester.pumpAndSettle();
   }
 
   Finder cardHearts() => find.byWidgetPredicate(

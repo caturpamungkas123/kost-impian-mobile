@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/app_shimmer.dart';
+
 /// Background hero + gradient overlay sesuai referensi Stitch
 /// (linear 180deg: 25% gelap atas → 88% gelap bawah).
 class OnboardingBackground extends StatelessWidget {
@@ -17,6 +19,13 @@ class OnboardingBackground extends StatelessWidget {
             imageUrl,
             fit: BoxFit.cover,
             alignment: Alignment.center,
+            // Shimmer full-bleed selagi hero image diunduh.
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return const AppShimmer(
+                child: ColoredBox(color: Colors.white),
+              );
+            },
             errorBuilder: (_, _, _) => Container(
               color: const Color(0xFF1A1A1A),
             ),

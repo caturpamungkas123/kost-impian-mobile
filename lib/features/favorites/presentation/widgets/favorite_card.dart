@@ -14,10 +14,14 @@ class FavoriteKosCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.onRemove,
+    this.onDetail,
   });
 
   final FavoriteKos item;
   final VoidCallback onRemove;
+
+  /// Tap "Lihat Detail" → halaman Detail Kos (prd.md §4 langkah 5).
+  final VoidCallback? onDetail;
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +275,7 @@ class FavoriteKosCard extends StatelessWidget {
                   _ActionPill(
                     label: 'Lihat Detail',
                     filled: true,
-                    onTap: () {},
+                    onTap: onDetail ?? () {},
                   ),
                 ],
               ),

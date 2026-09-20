@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/page_title.dart';
 
 /// Header Explore: lokasi + judul di kiri, notifikasi + avatar di kanan.
 class ExploreHeader extends StatelessWidget {
@@ -39,7 +40,7 @@ class ExploreHeader extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 2),
-            Text('Explore Kos', style: AppTypography.h2),
+            const PageTitle('Explore Kos'),
           ],
         ),
         Row(
